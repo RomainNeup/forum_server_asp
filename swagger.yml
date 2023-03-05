@@ -1,0 +1,722 @@
+openapi: 3.0.0
+info:
+  title: Minecraft Forum API
+  description: An API for Minecraft players to ask questions, chat with the community or share content
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+    description: Local server
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  requestBodies:
+    SectionRequestBody:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: Name of the section.
+                example: "General Discussion"
+              categoryId:
+                type: string
+                description: ID of the parent category to which the section belongs.
+                example: "5fa8d0ee-06b7-4d97-b1f2-1e961e2ed14f"
+    SubjectRequestBody:
+      description: Request body for creating or updating a subject
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: The name of the subject
+                example: "My subject"
+              text:
+                type: string
+                description: The content of the subject
+                example: "Lorem ipsum dolor sit amet, consectetur adipiscing elit."
+    MessageRequestBody:
+      description: Request body for creating or updating a message
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              text:
+                type: string
+                description: The content of the message
+                example: "I'm having trouble with my Minecraft server"
+          example:
+            text: "I'm having trouble with my Minecraft server"
+  responses:
+    UnauthorizedError:
+      description: Unauthorized error
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: Description of the error
+            example:
+              error: Unauthorized
+    InternalServerError:
+      description: An error occurred on the server.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: A message describing the error.
+                example: "An unexpected error occurred on the server."
+    BadRequestError:
+      description: The request was invalid or could not be understood by the server.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: A message describing the error.
+                example: "Invalid request body."
+    
+    NotFoundError:
+      description: The requested resource was not found on the server.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                description: A message describing the error.
+                example: "The requested section was not found."
+  schemas:
+    Category:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "c559b738-bc2d-4f3d-9f5c-3645e08d8d5f"
+        name:
+          type: string
+          example: "General"
+      required:
+        - id
+        - name
+    Section:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "37752b5d-06e9-4c6d-afca-820db6d12f6d"
+        name:
+          type: string
+          example: "Discussion"
+        category_id:
+          type: string
+          example: "c559b738-bc2d-4f3d-9f5c-3645e08d8d5f"
+      required:
+        - id
+        - name
+        - category_id
+    Subject:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "50c42313-4efc-4f57-aa9e-e2d3a3a69a2f"
+        name:
+          type: string
+          example: "How to make a redstone contraption?"
+        section_id:
+          type: string
+          example: "37752b5d-06e9-4c6d-afca-820db6d12f6d"
+        author_id:
+          type: string
+          example: "8a665d4e-56cb-4ec4-9d4c-ecf5c1d79df5"
+        created_at:
+          type: string
+          format: date-time
+          example: "2023-03-04T16:53:47.685Z"
+      required:
+        - id
+        - name
+        - section_id
+        - author_id
+        - created_at
+    Message:
+      type: object
+      properties:
+        id:
+          type: string
+          example: "aecf07e6-527d-42af-8f99-88d57b3dfcfe"
+        text:
+          type: string
+          example: "You can use a hopper clock for that"
+        author_id:
+          type: string
+          example: "8a665d4e-56cb-4ec4-9d4c-ecf5c1d79df5"
+        created_at:
+          type: string
+          format: date-time
+          example: "2023-03-04T17:02:15.475Z"
+      required:
+        - id
+        - text
+        - author_id
+        - created_at
+  parameters:
+    SectionIdParameter:
+      name: sectionId
+      in: path
+      required: true
+      description: The ID of the section to retrieve.
+      schema:
+        type: string
+        format: uuid
+    SubjectIdParameter:
+      name: subjectId
+      in: path
+      description: The ID of the subject to delete
+      required: true
+      schema:
+        type: integer
+        format: int64
+    MessageIdParameter:
+      name: messageId
+      in: path
+      description: ID of the message to retrieve or modify
+      required: true
+      schema:
+        type: string
+        format: uuid
+        example: 123e4567-e89b-12d3-a456-426655440000
+paths:
+  /auth/register:
+    post:
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: "user123"
+                password:
+                  type: string
+                  format: password
+                  example: "mysecretpassword"
+              required:
+                - username
+                - password
+      responses:
+        '201':
+          description: User registered successfully
+        '400':
+          description: Invalid request body
+        '409':
+          description: User with the same username already exists
+      tags:
+        - Auth
+  /auth/login:
+    post:
+      summary: Authenticate a user and obtain a JWT token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  example: "user123"
+                password:
+                  type: string
+                  format: password
+                  example: "mysecretpassword"
+              required:
+                - username
+                - password
+      responses:
+        '200':
+          description: JWT token obtained successfully
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  access_token:
+                    type: string
+                    example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX2lkIjoiODg4NzIzNzAtNjkzOC00NjExLWFiMDQtYjRhZmRiNTI4MjhlIiwiaWF0IjoxNjIzNDIxNzA0LCJleHAiOjE2MjM0MjUzMDR9.5OoFonrEh0fVl_1bGQ2Y7MjGvQ8Wk5LRzpq5R5eBN-E"
+        '401':
+          description: Invalid username or password
+      tags:
+        - Auth
+  /categories:
+    get:
+      summary: Get a list of all categories
+      responses:
+        '200':
+          description: List of categories returned successfully
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Category'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+      tags:
+        - Categories
+    post:
+      summary: Create a new category
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "General Discussion"
+              required:
+                - name
+      responses:
+        '201':
+          description: Category created successfully
+        '400':
+          description: Invalid request body
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+      tags:
+        - Categories
+  /categories/{categoryId}:
+    get:
+      summary: Get a category by ID
+      parameters:
+        - in: path
+          name: categoryId
+          required: true
+          description: ID of the category to retrieve
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Category retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Category'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Category with the specified ID not found
+      tags:
+        - Categories
+    put:
+      summary: Update a category by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: categoryId
+          required: true
+          description: ID of the category to update
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Category'
+      responses:
+        '204':
+          description: Category updated successfully
+        '400':
+          description: Invalid request body
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Category with the specified ID not found
+      tags:
+        - Categories
+    delete:
+      summary: Delete a category by ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: categoryId
+          required: true
+          description: ID of the category to delete
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Category deleted successfully
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          description: Category with the specified ID not found
+      tags:
+        - Categories
+  /sections:
+    get:
+      tags:
+        - Sections
+      summary: Get all sections
+      description: Retrieve a list of all sections
+      operationId: getAllSections
+      responses:
+        '200':
+          description: A list of sections
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Section'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - Sections
+      summary: Create a new section
+      security:
+        - bearerAuth: []
+      description: Create a new section with the given properties
+      operationId: createSection
+      requestBody:
+        $ref: '#/components/requestBodies/SectionRequestBody'
+      responses:
+        '201':
+          description: The created section
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Section'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /sections/{sectionId}:
+    get:
+      tags:
+        - Sections
+      summary: Get a section by ID
+      description: Retrieve the section with the given ID
+      operationId: getSectionById
+      parameters:
+        - $ref: '#/components/parameters/SectionIdParameter'
+      responses:
+        '200':
+          description: The section with the given ID
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Section'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      tags:
+        - Sections
+      summary: Update a section
+      security:
+        - bearerAuth: []
+      description: Update the section with the given ID
+      operationId: updateSection
+      parameters:
+        - $ref: '#/components/parameters/SectionIdParameter'
+      requestBody:
+        $ref: '#/components/requestBodies/SectionRequestBody'
+      responses:
+        '200':
+          description: The updated section
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Section'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags:
+        - Sections
+      summary: Delete a section
+      security:
+        - bearerAuth: []
+      description: Delete the section with the given ID
+      operationId: deleteSection
+      parameters:
+        - $ref: '#/components/parameters/SectionIdParameter'
+      responses:
+        '204':
+          description: Section successfully deleted
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /sections/{sectionId}/subjects:
+    get:
+      tags:
+        - subjects
+      summary: Get all subjects for a section
+      description: Retrieves all subjects that belong to a given section.
+      operationId: getSubjectsForSection
+      parameters:
+        - $ref: '#/components/parameters/SectionIdParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Subject'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    post:
+      tags:
+        - subjects
+      summary: Create a new subject in a section
+      security:
+        - bearerAuth: []
+      description: Creates a new subject within a given section.
+      operationId: createSubjectInSection
+      parameters:
+        - $ref: '#/components/parameters/SectionIdParameter'
+      requestBody:
+        $ref: '#/components/requestBodies/SubjectRequestBody'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subject'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+  /sections/{sectionId}/subjects/{subjectId}:
+    get:
+      tags:
+        - subjects
+      summary: Get a subject in a section
+      description: Retrieves a single subject that belongs to a given section.
+      operationId: getSubjectInSection
+      parameters:
+        - $ref: '#/components/parameters/SectionIdParameter'
+        - $ref: '#/components/parameters/SubjectIdParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subject'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    put:
+      tags:
+        - subjects
+      summary: Update a subject in a section
+      security:
+        - bearerAuth: []
+      description: Updates a single subject that belongs to a given section.
+      operationId: updateSubjectInSection
+      parameters:
+        - $ref: '#/components/parameters/SectionIdParameter'
+        - $ref: '#/components/parameters/SubjectIdParameter'
+      requestBody:
+        $ref: '#/components/requestBodies/SubjectRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Subject'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+
+    delete:
+      tags:
+        - subjects
+      summary: Delete a subject from a section
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/SectionIdParameter'
+        - $ref: '#/components/parameters/SubjectIdParameter'
+      responses:
+        '204':
+          description: The subject was deleted successfully
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /sections/{sectionId}/subjects/{subjectId}/messages:
+    get:
+      tags:
+        - Messages
+      summary: Get messages for a subject
+      description: Retrieve a list of messages for a given subject in a section
+      parameters:
+        - $ref: '#/components/parameters/SectionIdParameter'
+        - $ref: '#/components/parameters/SubjectIdParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Message'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    post:
+      tags:
+        - Messages
+      summary: Create a new message
+      security:
+        - bearerAuth: []
+      description: Create a new message for a given subject in a section
+      parameters:
+        - $ref: '#/components/parameters/SectionIdParameter'
+        - $ref: '#/components/parameters/SubjectIdParameter'
+      requestBody:
+        $ref: '#/components/requestBodies/MessageRequestBody'
+      responses:
+        '201':
+          description: Created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+  /sections/{sectionId}/subjects/{subjectId}/messages/{messageId}:
+    get:
+      tags:
+        - Messages
+      summary: Get a message by ID
+      description: Retrieve a single message by ID for a given subject in a section
+      parameters:
+        - $ref: '#/components/parameters/SectionIdParameter'
+        - $ref: '#/components/parameters/SubjectIdParameter'
+        - $ref: '#/components/parameters/MessageIdParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    put:
+      tags:
+        - Messages
+      summary: Update a message by ID
+      security:
+        - bearerAuth: []
+      description: Update a single message by ID for a given subject in a section
+      parameters:
+        - $ref: '#/components/parameters/SectionIdParameter'
+        - $ref: '#/components/parameters/SubjectIdParameter'
+        - $ref: '#/components/parameters/MessageIdParameter'
+      requestBody:
+        $ref: '#/components/requestBodies/MessageRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Message'
+        '400':
+          $ref: '#/components/responses/BadRequestError'
+        '401':
+          $ref: '#/components/responses/UnauthorizedError'
+        '404':
+          $ref: '#/components/responses/NotFoundError'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
+    delete:
+      tags:
+        - Messages
+      summary: Delete a message
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/SectionIdParameter'
+        - $ref: '#/components/parameters/SubjectIdParameter'
+        - $ref: '#/components/parameters/MessageIdParameter'
+      responses:
+        '204':
+          description: Message successfully deleted

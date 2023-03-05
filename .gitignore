@@ -1,0 +1,14 @@
+# Visual Studio files
+.vs/
+obj/
+bin/
+
+# Build results
+[Bb]in/
+[Oo]bj/
+
+# Package files
+*.nupkg
+*.snupkg
+**/node_modules/
+**/bower_components/
