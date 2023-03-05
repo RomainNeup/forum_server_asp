@@ -13,7 +13,7 @@ ForumAPI is a RESTful API built with ASP.NET Core that allows users to create, r
 ## Forum API Routes
 
 ### Auth Routes
-
+---
 **🔓 POST `/auth/register`**
 
 *Registers a new user account.*
@@ -26,6 +26,8 @@ ForumAPI is a RESTful API built with ASP.NET Core that allows users to create, r
     "password": "string"
 }
 ```
+<br>
+
 **🔓 POST `/auth/login`**
 
 *Logs in a user and returns an authentication token.*
@@ -39,7 +41,7 @@ ForumAPI is a RESTful API built with ASP.NET Core that allows users to create, r
 ```
 
 ### Category Routes
-
+---
 **🔐 POST `/categories`**
 
 *Creates a new category.*
@@ -51,13 +53,19 @@ ForumAPI is a RESTful API built with ASP.NET Core that allows users to create, r
     "description": "string"
 }
 ```
+<br>
+
 **🔓 GET `/categories`**
 
 *Returns a list of all categories.*
 
+<br>
+
 **🔓 GET `/categories/{id}`**
 
 *Returns the details of a single category.*
+
+<br>
 
 **🔐 PUT `/categories/{id}`**
 
@@ -70,12 +78,14 @@ ForumAPI is a RESTful API built with ASP.NET Core that allows users to create, r
     "description": "string"
 }
 ```
+<br>
+
 **🔐 DELETE `/categories/{id}`**
 
 *Deletes an existing category.*
 
 ### Section Routes
-
+---
 **🔐 POST `/sections`**
 
 *Creates a new section in the specified category.*
@@ -88,13 +98,19 @@ ForumAPI is a RESTful API built with ASP.NET Core that allows users to create, r
     "categoryId": "integer"
 }
 ```
+<br>
+
 **🔓 GET `/sections`**
 
 *Returns a list of all sections.*
 
+<br>
+
 **🔓 GET `/sections/{id}`**
 
 *Returns the details of a single section.*
+
+<br>
 
 **🔐 PUT `/sections/{id}`**
 
@@ -107,12 +123,14 @@ ForumAPI is a RESTful API built with ASP.NET Core that allows users to create, r
     "description": "string"
 }
 ```
+<br>
+
 **🔐 DELETE `/sections/{id}`**
 
 *Deletes an existing section.*
 
 ### Subject Routes
-
+---
 **🔐 POST `/sections/{sectionId}/subjects`**
 
 *Creates a new subject in the specified section.*
@@ -124,13 +142,19 @@ ForumAPI is a RESTful API built with ASP.NET Core that allows users to create, r
     "text": "string"
 }
 ```
+<br>
+
 **🔓 GET `/sections/{sectionId}/subjects`**
 
 *Returns a list of all subjects in the specified section.*
 
+<br>
+
 **🔓 GET `/sections/{sectionId}/subjects/{id}`**
 
 *Returns the details of a single subject.*
+
+<br>
 
 **🔐 PUT `/sections/{sectionId}/subjects/{id}`**
 
@@ -143,12 +167,14 @@ ForumAPI is a RESTful API built with ASP.NET Core that allows users to create, r
     "text": "string"
 }
 ```
+<br>
+
 **🔐 DELETE `/sections/{sectionId}/subjects/{id}`**
 
 *Deletes an existing subject.*
 
 ### Message Routes
-
+---
 **🔐 POST `/subjects/{subjectId}/messages`**
 
 *Creates a new message in the specified subject.*
@@ -159,13 +185,19 @@ ForumAPI is a RESTful API built with ASP.NET Core that allows users to create, r
     "text": "string"
 }
 ```
+<br>
+
 **🔓 GET `/subjects/{subjectId}/messages`**
 
 *Returns a list of all messages in the specified subject.*
 
+<br>
+
 **🔓 GET `/subjects/{subjectId}/messages/{id}`**
 
 *Returns the details of a single message.*
+
+<br>
 
 **🔐 PUT `/subjects/{subjectId}/messages/{id}`**
 
@@ -177,7 +209,9 @@ ForumAPI is a RESTful API built with ASP.NET Core that allows users to create, r
     "text": "string"
 }
 ```
-**🔐 DELETE `/subjects/{subjectId}/messages/{id}`**
+<br>
+
+**🔐 DELETE `/subjects/{subjectId}/messages/{id}`**  
 
 *Deletes an existing message.*
 
