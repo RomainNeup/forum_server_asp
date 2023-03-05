@@ -26,6 +26,8 @@ namespace ForumAPI.Repositories
                 section.Description = reader.GetString(reader.GetOrdinal("description"));
             if (!reader.IsDBNull(reader.GetOrdinal("categoryId")))
                 section.CategoryId = reader.GetInt32(reader.GetOrdinal("categoryId"));
+            if (!reader.IsDBNull(reader.GetOrdinal("ownerId")))
+                section.OwnerId = reader.GetInt32(reader.GetOrdinal("ownerId"));
 
             return section;
         }
@@ -69,7 +71,7 @@ namespace ForumAPI.Repositories
             {
                 await connection.OpenAsync();
 
-                var query = "INSERT INTO sections (name, description, categoryId) VALUES (@name, @description, @categoryId);" +
+                var query = "INSERT INTO sections (name, description, categoryId, ownerId) VALUES (@name, @description, @categoryId, @ownerId);" +
                             "SELECT LAST_INSERT_ID();";
 
                 using (var command = new MySqlCommand(query, connection))
@@ -77,6 +79,7 @@ namespace ForumAPI.Repositories
                     command.Parameters.AddWithValue("@name", section.Name);
                     command.Parameters.AddWithValue("@description", section.Description);
                     command.Parameters.AddWithValue("@categoryId", section.CategoryId);
+                    command.Parameters.AddWithValue("@ownerId", section.OwnerId);
 
                     var id = Convert.ToInt32(await command.ExecuteScalarAsync());
 

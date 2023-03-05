@@ -3,16 +3,35 @@ using ForumAPI.Repositories.Models;
 
 namespace ForumAPI.Repositories
 {
-    public class UserRepository
+    public class UserRepository: IRepository<User>
     {
         private readonly IConfiguration _configuration;
 
-        public UserRepository(IConfiguration configuration)
+        public UserRepository(IConfiguration configuration): base(configuration)
         {
+            tableName = "users";
             _configuration = configuration;
         }
 
-        public async Task<User> CreateAsync(User user)
+        override public User Map(MySqlDataReader reader)
+        {
+            User user = new User();
+
+            if (!reader.IsDBNull(reader.GetOrdinal("id")))
+                user.Id = reader.GetInt32(reader.GetOrdinal("id"));
+            if (!reader.IsDBNull(reader.GetOrdinal("name")))
+                user.Name = reader.GetString(reader.GetOrdinal("name"));
+            if (!reader.IsDBNull(reader.GetOrdinal("email")))
+                user.Email = reader.GetString(reader.GetOrdinal("email"));
+            if (!reader.IsDBNull(reader.GetOrdinal("password")))
+                user.Password = reader.GetString(reader.GetOrdinal("password"));
+            if (!reader.IsDBNull(reader.GetOrdinal("role")))
+                user.Role = reader.GetInt32(reader.GetOrdinal("role"));
+
+            return user;
+        }
+
+        override public async Task<User> CreateAsync(User user)
         {
             var connectionString = _configuration.GetConnectionString("DefaultConnection");
 
@@ -32,7 +51,12 @@ namespace ForumAPI.Repositories
             }
         }
 
-        public async Task<User> UpdateAsync(User user)
+        public override Task<IEnumerable<User>> GetByParentIdAsync(int id)
+        {
+            throw new NotImplementedException();
+        }
+
+        override public async Task<User> UpdateAsync(User user)
         {
             var connectionString = _configuration.GetConnectionString("DefaultConnection");
 

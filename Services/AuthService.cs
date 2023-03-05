@@ -11,13 +11,13 @@ namespace ForumAPI.Services
 {
     public class AuthService
     {
-        private readonly UserRepository _usersRepository;
+        private readonly UsersService _usersService;
         private readonly UserManager<User> _userManager;
         private readonly IConfiguration _configuration;
 
-        public AuthService(UserManager<User> userManager, UserRepository usersRepository, IConfiguration configuration)
+        public AuthService(UserManager<User> userManager, UsersService usersService, IConfiguration configuration)
         {
-            _usersRepository = usersRepository;
+            _usersService = usersService;
             _configuration = configuration;
             _userManager = userManager;
         }
@@ -33,13 +33,13 @@ namespace ForumAPI.Services
 
         public async Task<User> RegisterAsync(User user)
         {
-            if (user.Email == null || await _usersRepository.GetByEmail(user.Email) != null)
+            if (user.Email == null || await _usersService.GetByEmailAsync(user.Email) != null)
             {
                 throw new ArgumentException($"User with email {user.Email} already exists.");
             }
 
             user.Password = HashPassword(user.Password);
-            return await _usersRepository.CreateAsync(user);
+            return await _usersService.CreateAsync(user);
         }
 
         public async Task<JwtSecurityToken> Login(LoginModel model)
@@ -54,7 +54,7 @@ namespace ForumAPI.Services
             var userRoles = await _userManager.GetRolesAsync(user);
             var authClaims = new List<Claim>
             {
-                new Claim("Id", user.Id.ToString()),
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
                 new Claim(ClaimTypes.Name, user.Email),
             };
             foreach (var userRole in userRoles)

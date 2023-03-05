@@ -19,7 +19,7 @@ namespace ForumAPI.DTOs.Mapping
         {
             var sections = _sectionService.GetByParentIdAsync(source.Id).Result;
             var result = new List<SectionDto>();
-            Console.WriteLine("Sections: " + sections.Count());
+
             foreach (var section in sections)
             {
                 var sectionDto = _mapper.Map<SectionDto>(section);

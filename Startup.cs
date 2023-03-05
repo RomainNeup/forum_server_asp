@@ -35,10 +35,13 @@ namespace ForumAPI
             services.AddScoped<IRepositoryBase<Section>, SectionsRepository>();
             services.AddScoped<IRepositoryBase<Subject>, SubjectsRepository>();
             services.AddScoped<IRepositoryBase<Message>, MessagesRepository>();
+            services.AddScoped<IRepositoryBase<User>, UserRepository>();
+            services.AddScoped<UserRepository>();
             services.AddScoped<IServiceBase<Category>, CategoriesService>();
             services.AddScoped<IServiceBase<Section>, SectionsService>();
             services.AddScoped<IServiceBase<Subject>, SubjectsService>();
             services.AddScoped<IServiceBase<Message>, MessagesService>();
+            services.AddScoped<IServiceBase<User>, UsersService>();
             services.AddControllers();
 
             services.AddIdentity<User, IdentityRole<int>>()

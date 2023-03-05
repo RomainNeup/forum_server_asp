@@ -6,5 +6,6 @@ namespace ForumAPI.DTOs
         public string Name { get; set; } = null!;
         public string Text { get; set; } = null!;
         public List<MessageDto>? Messages { get; set; }
+        public UserDto Owner { get; set; } = null!;
     }
 }

@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace ForumAPI.Repositories.Models
 {
-    public class Section : BaseModel
+    public class Section : BaseOwnedModel
     {
 
         [Required]
