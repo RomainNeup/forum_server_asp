@@ -4,7 +4,7 @@
 ForumAPI is a RESTful API built with ASP.NET Core that allows users to create, read, update, and delete categories, sections, subjects, and messages.
 
 ## Installation
-1. Clone the repository: git clone https://github.com/your-username/ForumAPI.git
+1. Clone the repository: git clone git@github.com:RomainNeup/forum_server_asp.git
 2. Navigate to the project directory: `cd ForumAPI`**
 3. Restore the dependencies: dotnet `restore`**
 4. Build the project: `dotnet build`**
